@@ -1,11 +1,8 @@
 package com.enigma.konyaku.entity;
 
 import com.enigma.konyaku.constant.TableConstant;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -13,8 +10,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = TableConstant.USER)
-public class User {
+@Table(name = TableConstant.SHOP)
+public class Shop {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
@@ -27,9 +24,8 @@ public class User {
     private Address address;
     @Column(name = "activity")
     private Boolean activity;
-    @OneToMany(mappedBy = "user")
-    @JsonManagedReference
-    private List<AccountImage> identificationImages;
+    @Column(name = "availability")
+    private Boolean availability;
     @OneToOne
     @JoinColumn(name = "user_account_id", unique = true)
     private UserAccount userAccount;

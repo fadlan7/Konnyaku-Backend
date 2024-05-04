@@ -7,10 +7,12 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SearchRequest {
+public class SearchShopRequest {
     private Integer page;
     private Integer size;
     private String sortBy;
     private String direction;
     private String name;
+    private Boolean activity;
+    private Boolean availability;
 }
