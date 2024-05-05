@@ -21,13 +21,15 @@ public class ProductDetail {
     private String id;
     @Column(name = "name")
     private String name;
+    @Column(name = "description")
+    private String description;
     @ManyToOne
     @JoinColumn(name = "product_id")
     @JsonBackReference
     private Product product;
     @Column(name = "price")
     private Integer price;
-    @OneToMany(mappedBy = "productDetail")
-    @JsonManagedReference
-    private List<ProductImage> images;
+    @OneToOne
+    @JoinColumn(name = "image_id")
+    private Image image;
 }

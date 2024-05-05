@@ -41,6 +41,17 @@ public class UserServiceImpl implements UserService {
         User user = getUserById(id);
         return UserResponse.builder()
                 .id(user.getId())
+                .name(user.getName())
+                .mobilePhoneNo(user.getMobilePhoneNo())
+                .address(
+                        AddressResponse.builder()
+                                .id(user.getAddress().getId())
+                                .provinceName(user.getAddress().getProvinceName())
+                                .provinceId(user.getAddress().getProvinceId())
+                                .cityName(user.getAddress().getCityName())
+                                .cityId(user.getAddress().getCityId())
+                                .build()
+                )
                 .identificationImages(
                         user.getIdentificationImages()
                                 .stream().map((accountImage ->
@@ -112,7 +123,30 @@ public class UserServiceImpl implements UserService {
         user.setMobilePhoneNo(request.getMobilePhoneNo());
         user.setName(request.getName());
         user.setAddress(address);
-        return null;
+
+        user = userRepository.saveAndFlush(user);
+        return UserResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .mobilePhoneNo(user.getMobilePhoneNo())
+                .address(
+                        AddressResponse.builder()
+                                .street(user.getAddress().getStreet())
+                                .cityId(user.getAddress().getCityId())
+                                .cityName(user.getAddress().getCityName())
+                                .provinceId(user.getAddress().getProvinceId())
+                                .provinceName(user.getAddress().getProvinceName())
+                                .build()
+                )
+                .identificationImages(
+                        user.getIdentificationImages().stream().map(
+                                image -> ImageResponse.builder()
+                                        .name(image.getImage().getName())
+                                        .url(ApiUrl.API_MENU_IMAGE_DOWNLOAD + image.getImage().getId())
+                                        .build()
+                        ).toList()
+                )
+                .build();
     }
 
     @Transactional(rollbackFor = Exception.class)

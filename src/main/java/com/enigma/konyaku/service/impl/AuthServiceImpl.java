@@ -62,7 +62,7 @@ public class AuthServiceImpl implements AuthService {
 
         userAccountRepository.save(account);
     }
-
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public RegisterResponse registerAdmin(RegisterRequest request) {
         Role userRole = roleService.getOrSave(UserRole.ROLE_USER);
@@ -173,6 +173,7 @@ public class AuthServiceImpl implements AuthService {
         UserAccount userAccount = (UserAccount) authenticate.getPrincipal();
         String token = jwtService.generateToken(userAccount);
         return LoginResponse.builder()
+                .userAccountId(userAccount.getId())
                 .username(userAccount.getUsername())
                 .roles(userAccount.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
                 .token(token)

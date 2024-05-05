@@ -22,6 +22,8 @@ public class Product {
     private String id;
     @Column(name = "name")
     private String name;
+    @Column(name = "description")
+    private String description;
     @Column(name = "weight")
     private Integer weight;
     @ManyToOne

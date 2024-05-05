@@ -2,6 +2,7 @@ package com.enigma.konyaku.specification;
 
 import com.enigma.konyaku.dto.request.SearchRequest;
 import com.enigma.konyaku.dto.request.SearchShopRequest;
+import com.enigma.konyaku.entity.Shop;
 import com.enigma.konyaku.entity.User;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ShopSpecification {
-    public static Specification<User> getSpecification(SearchShopRequest request) {
+    public static Specification<Shop> getSpecification(SearchShopRequest request) {
         return (r, q, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
