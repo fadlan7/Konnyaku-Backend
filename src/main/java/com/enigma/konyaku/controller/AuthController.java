@@ -56,8 +56,8 @@ public class AuthController {
         }
     }
 
-    @PostMapping(path = "/role/{id}")
-    public ResponseEntity<CommonResponse<RegisterResponse>> updateRoles(@PathVariable String id){
+    @PostMapping(path = "/role")
+    public ResponseEntity<CommonResponse<RegisterResponse>> updateRoles(@RequestBody String id){
         RegisterResponse registerResponse = authService.updateRoles(id);
         CommonResponse<RegisterResponse> response = CommonResponse.<RegisterResponse>builder()
                 .statusCode(HttpStatus.OK.value())
