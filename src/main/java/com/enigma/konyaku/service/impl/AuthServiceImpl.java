@@ -115,6 +115,28 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
+    public RegisterResponse updateRoles(String id) {
+        Optional<UserAccount> account = userAccountRepository.findById(id);
+        if (account.isEmpty()) throw new RuntimeException("Account not found");
+
+        List<Role> roles = account.get().getRole();
+        roles.add(roleService.getOrSave(UserRole.ROLE_VENDOR));
+
+        UserAccount updatedAccount = account.get();
+        updatedAccount.setRole(roles);
+        updatedAccount = userAccountRepository.saveAndFlush(updatedAccount);
+
+        List<String> updatedAccountRoles = updatedAccount.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).toList();
+
+        return RegisterResponse.builder()
+                .username(updatedAccount.getUsername())
+                .roles(updatedAccountRoles)
+                .build();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
     public RegisterResponse register(RegisterRequest request) throws DataIntegrityViolationException {
         Role role = roleService.getOrSave(UserRole.ROLE_USER);
         String hashPassword = passwordEncoder.encode(request.getPassword());
@@ -154,6 +176,8 @@ public class AuthServiceImpl implements AuthService {
 
         List<String> roles = account.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).toList();
+
+        System.out.println(roles.get(0));
 
         return RegisterResponse.builder()
                 .username(account.getUsername())

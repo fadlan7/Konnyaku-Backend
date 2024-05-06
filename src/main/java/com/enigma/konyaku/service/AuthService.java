@@ -10,4 +10,5 @@ public interface AuthService {
     RegisterResponse registerAdmin(RegisterRequest request);
     LoginResponse login(AuthRequest request);
     boolean validateToken();
+    RegisterResponse updateRoles(String id);
 }

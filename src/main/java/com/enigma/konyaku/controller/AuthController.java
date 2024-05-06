@@ -7,30 +7,65 @@ import com.enigma.konyaku.dto.response.CommonResponse;
 import com.enigma.konyaku.dto.response.LoginResponse;
 import com.enigma.konyaku.dto.response.RegisterResponse;
 import com.enigma.konyaku.service.AuthService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Arrays;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = ApiUrl.API_AUTH)
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
+    private final ObjectMapper objectMapper;
 
     @PostMapping(path = "/register/user",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<CommonResponse<?>> registerUser(@RequestBody RegisterRequest request) {
-        RegisterResponse register = authService.register(request);
+    public ResponseEntity<CommonResponse<?>> registerUser(
+            @RequestPart(name = "registration") String jsonRegistration,
+            @RequestPart(name = "images") MultipartFile[] images
+            ) {
+        CommonResponse.CommonResponseBuilder<RegisterResponse> responseBuilder = CommonResponse.builder();
+        try {
+            RegisterRequest request = objectMapper.readValue(jsonRegistration, new TypeReference<>() {
+            });
+            request.setImages(List.of(images));
+
+            RegisterResponse register = authService.register(request);
+            CommonResponse<RegisterResponse> response = CommonResponse.<RegisterResponse>builder()
+                    .statusCode(HttpStatus.CREATED.value())
+                    .message("Successfully Registered")
+                    .data(register)
+                    .build();
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+        } catch (Exception e) {
+            responseBuilder.message("Internal server error");
+            responseBuilder.statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseBuilder.build());
+        }
+    }
+
+    @PostMapping(path = "/role/{id}")
+    public ResponseEntity<CommonResponse<RegisterResponse>> updateRoles(@PathVariable String id){
+        RegisterResponse registerResponse = authService.updateRoles(id);
         CommonResponse<RegisterResponse> response = CommonResponse.<RegisterResponse>builder()
-                .statusCode(HttpStatus.CREATED.value())
-                .message("Successfully Registered")
-                .data(register)
+                .statusCode(HttpStatus.OK.value())
+                .message("Successfully update roles")
+                .data(registerResponse)
                 .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping(path = "/register/admin",

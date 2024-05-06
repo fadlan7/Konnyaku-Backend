@@ -1,5 +1,6 @@
 package com.enigma.konyaku.service.impl;
 
+import com.enigma.konyaku.constant.UserRole;
 import com.enigma.konyaku.dto.request.NewShopRequest;
 import com.enigma.konyaku.dto.request.SearchShopRequest;
 import com.enigma.konyaku.dto.request.ShopActivityRequest;
@@ -7,12 +8,11 @@ import com.enigma.konyaku.dto.request.UpdateShopRequest;
 import com.enigma.konyaku.dto.response.AddressResponse;
 import com.enigma.konyaku.dto.response.ShopResponse;
 import com.enigma.konyaku.entity.Address;
+import com.enigma.konyaku.entity.Role;
 import com.enigma.konyaku.entity.Shop;
 import com.enigma.konyaku.entity.UserAccount;
 import com.enigma.konyaku.repository.ShopRepository;
-import com.enigma.konyaku.service.AddressService;
-import com.enigma.konyaku.service.ShopService;
-import com.enigma.konyaku.service.UserAccountService;
+import com.enigma.konyaku.service.*;
 import com.enigma.konyaku.specification.ShopSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -31,12 +32,15 @@ import java.util.Optional;
 public class ShopServiceImpl implements ShopService {
     private final ShopRepository repository;
     private final UserAccountService accountService;
+    private final AuthService authService;
     private final AddressService addressService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Shop create(NewShopRequest request) {
         UserAccount account = accountService.getByUserId(request.getUserAccountId());
+
+        authService.updateRoles(account.getId());
 
         Address address = addressService.create(request.getAddress());
 
@@ -74,6 +78,7 @@ public class ShopServiceImpl implements ShopService {
                 .build();
     }
     @Transactional(rollbackFor = Exception.class)
+
     @Override
     public Shop getShopById(String id) {
         Optional<Shop> shop = repository.findById(id);
@@ -88,6 +93,7 @@ public class ShopServiceImpl implements ShopService {
         if (request.getAddressRequest() != null) {
             AddressResponse response = addressService.update(request.getAddressRequest());
             Address address = Address.builder()
+                    .id(response.getId())
                     .street(response.getStreet())
                     .cityName(response.getCityName())
                     .cityId(response.getCityId())
@@ -111,6 +117,7 @@ public class ShopServiceImpl implements ShopService {
                 .activity(shop.getActivity())
                 .address(
                         AddressResponse.builder()
+                                .id(shop.getAddress().getId())
                                 .street(shop.getAddress().getStreet())
                                 .provinceName(shop.getAddress().getProvinceName())
                                 .provinceId(shop.getAddress().getProvinceId())
@@ -137,6 +144,7 @@ public class ShopServiceImpl implements ShopService {
                             .mobilePhoneNo(shop.getMobilePhoneNo())
                             .address(
                                     AddressResponse.builder()
+                                            .id(shop.getAddress().getId())
                                             .street(shop.getAddress().getStreet())
                                             .cityId(shop.getAddress().getCityId())
                                             .cityName(shop.getAddress().getCityName())
@@ -166,6 +174,7 @@ public class ShopServiceImpl implements ShopService {
                 .activity(shop.getActivity())
                 .address(
                         AddressResponse.builder()
+                                .id(shop.getAddress().getId())
                                 .street(shop.getAddress().getStreet())
                                 .provinceName(shop.getAddress().getProvinceName())
                                 .provinceId(shop.getAddress().getProvinceId())
