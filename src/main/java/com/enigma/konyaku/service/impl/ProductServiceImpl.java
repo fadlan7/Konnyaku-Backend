@@ -36,6 +36,9 @@ public class ProductServiceImpl implements ProductService {
         Product product = repository.saveAndFlush(
                 Product.builder()
                         .name(request.getName())
+                        .image(
+                                imageService.create(request.getThumbnail())
+                        )
                         .shop(shopService.getShopById(request.getShopId()))
                         .description(request.getDescription())
                         .weight(request.getWeight())

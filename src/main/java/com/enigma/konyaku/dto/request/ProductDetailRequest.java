@@ -13,7 +13,6 @@ import java.util.List;
 public class ProductDetailRequest {
     private String name;
     private String description;
-    private Integer weight;
     private Integer price;
     private MultipartFile image;
 }
