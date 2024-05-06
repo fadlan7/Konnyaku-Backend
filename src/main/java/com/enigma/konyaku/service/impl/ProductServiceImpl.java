@@ -71,7 +71,7 @@ public class ProductServiceImpl implements ProductService {
                             .image(
                                     ImageResponse.builder()
                                             .name(detail.getImage().getName())
-                                            .url(ApiUrl.API_MENU_IMAGE_DOWNLOAD + detail.getImage().getId())
+                                            .url(ApiUrl.API_IMAGE_DOWNLOAD + detail.getImage().getId())
                                             .build()
                             )
                             .build();
@@ -81,6 +81,12 @@ public class ProductServiceImpl implements ProductService {
         return ProductResponse.builder()
                 .name(product.getName())
                 .description(product.getDescription())
+                .thumbnail(
+                        ImageResponse.builder()
+                                .name(product.getImage().getName())
+                                .url(ApiUrl.API_IMAGE_DOWNLOAD + product.getImage().getId())
+                                .build()
+                )
                 .weight(product.getWeight())
                 .status(product.getStatus())
                 .details(detailResponses)
@@ -121,6 +127,12 @@ public class ProductServiceImpl implements ProductService {
                         .id(product.getId())
                         .name(product.getName())
                         .description(product.getDescription())
+                        .thumbnail(
+                                ImageResponse.builder()
+                                        .name(product.getImage().getName())
+                                        .url(ApiUrl.API_IMAGE_DOWNLOAD + product.getImage().getId())
+                                        .build()
+                        )
                         .weight(product.getWeight())
                         .status(product.getStatus())
                         .details(product.getDetails().stream().map(
@@ -132,7 +144,7 @@ public class ProductServiceImpl implements ProductService {
                                         .image(
                                                 ImageResponse.builder()
                                                         .name(detail.getImage().getName())
-                                                        .url(ApiUrl.API_MENU_IMAGE_DOWNLOAD + detail.getImage().getId())
+                                                        .url(ApiUrl.API_IMAGE_DOWNLOAD + detail.getImage().getId())
                                                         .build()
                                         )
                                         .build()
@@ -155,6 +167,12 @@ public class ProductServiceImpl implements ProductService {
                 .id(product.getId())
                 .name(product.getName())
                 .description(product.getDescription())
+                .thumbnail(
+                        ImageResponse.builder()
+                                .name(product.getImage().getName())
+                                .url(ApiUrl.API_IMAGE_DOWNLOAD + product.getImage().getId())
+                                .build()
+                )
                 .weight(product.getWeight())
                 .status(product.getStatus())
                 .details(product.getDetails().stream().map(
@@ -166,7 +184,7 @@ public class ProductServiceImpl implements ProductService {
                                 .image(
                                         ImageResponse.builder()
                                                 .name(detail.getImage().getName())
-                                                .name(ApiUrl.API_MENU_IMAGE_DOWNLOAD + detail.getImage().getId())
+                                                .name(ApiUrl.API_IMAGE_DOWNLOAD + detail.getImage().getId())
                                                 .build()
                                 )
                                 .build()
@@ -188,6 +206,12 @@ public class ProductServiceImpl implements ProductService {
                 .id(product.getId())
                 .name(product.getName())
                 .description(product.getDescription())
+                .thumbnail(
+                        ImageResponse.builder()
+                                .name(product.getImage().getName())
+                                .url(ApiUrl.API_IMAGE_DOWNLOAD + product.getImage().getId())
+                                .build()
+                )
                 .weight(product.getWeight())
                 .status(product.getStatus())
                 .details(product.getDetails().stream().map(
@@ -199,7 +223,7 @@ public class ProductServiceImpl implements ProductService {
                                 .image(
                                         ImageResponse.builder()
                                                 .name(detail.getImage().getName())
-                                                .url(ApiUrl.API_MENU_IMAGE_DOWNLOAD + detail.getImage().getId())
+                                                .url(ApiUrl.API_IMAGE_DOWNLOAD + detail.getImage().getId())
                                                 .build()
                                 )
                                 .build()
