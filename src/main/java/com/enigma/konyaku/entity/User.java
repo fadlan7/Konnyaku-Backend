@@ -30,6 +30,9 @@ public class User {
     @OneToMany(mappedBy = "user")
     @JsonManagedReference
     private List<AccountImage> identificationImages;
+    @OneToMany(mappedBy = "user")
+    @JsonManagedReference
+    private List<WishList> wishList;
     @OneToOne
     @JoinColumn(name = "user_account_id", unique = true)
     private UserAccount userAccount;

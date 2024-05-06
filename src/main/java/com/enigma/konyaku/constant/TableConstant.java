@@ -13,4 +13,5 @@ public class TableConstant {
     public final static String TRANSACTION_IMAGE = "t_transaction_image";
     public final static String FINE = "t_fine";
     public final static String PAYMENT = "t_payment";
+    public static final String WISH_LIST = "m_wish_list";
 }

@@ -37,6 +37,13 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
+    public User findByAccountId(String id) {
+        Optional<User> user = userRepository.findByAccountId(id);
+        if (user.isEmpty()) throw new RuntimeException("User not found");
+        return user.get();
+    }
+    @Transactional(rollbackFor = Exception.class)
+    @Override
     public UserResponse getById(String id) {
         User user = getUserById(id);
         return UserResponse.builder()

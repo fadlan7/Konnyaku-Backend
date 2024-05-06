@@ -12,5 +12,6 @@ public interface UserService {
     User getUserById(String id);
     Page<UserResponse> getAll(SearchRequest request);
     UserResponse update(UpdateUserRequest request);
+    User findByAccountId(String id);
     void delete(String id);
 }

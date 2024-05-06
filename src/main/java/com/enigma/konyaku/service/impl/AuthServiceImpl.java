@@ -87,6 +87,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userService.create(
                 User.builder()
                         .name(request.getName())
+                        .activity(true)
                         .mobilePhoneNo(request.getMobilePhoneNo())
                         .address(address)
                         .userAccount(account)
@@ -159,6 +160,7 @@ public class AuthServiceImpl implements AuthService {
                         .name(request.getName())
                         .mobilePhoneNo(request.getMobilePhoneNo())
                         .address(address)
+                        .activity(true)
                         .userAccount(account)
                         .build()
         );
