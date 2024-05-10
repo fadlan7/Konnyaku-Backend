@@ -7,7 +7,6 @@ import com.enigma.konyaku.dto.request.SearchProductByShopRequest;
 import com.enigma.konyaku.dto.response.CommonResponse;
 import com.enigma.konyaku.dto.response.PagingResponse;
 import com.enigma.konyaku.dto.response.ProductResponse;
-import com.enigma.konyaku.dto.response.ShopResponse;
 import com.enigma.konyaku.service.ProductService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
