@@ -3,17 +3,22 @@ package com.enigma.konyaku.controller;
 import com.enigma.konyaku.constant.ApiUrl;
 import com.enigma.konyaku.dto.request.NewProductRequest;
 import com.enigma.konyaku.dto.request.ProductDetailRequest;
+import com.enigma.konyaku.dto.request.SearchProductByShopRequest;
 import com.enigma.konyaku.dto.response.CommonResponse;
+import com.enigma.konyaku.dto.response.PagingResponse;
 import com.enigma.konyaku.dto.response.ProductResponse;
 import com.enigma.konyaku.service.ProductService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -59,16 +64,40 @@ public class ProductController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<CommonResponse<ProductResponse>> getAllProducts(
-            @RequestParam(name  = "page", defaultValue = "1") Integer page,
+    @GetMapping(path = "/shop")
+    public ResponseEntity<CommonResponse<List<ProductResponse>>> getAll(
+            @RequestParam(name = "page", defaultValue = "1") Integer page,
             @RequestParam(name = "size", defaultValue = "10") Integer size,
             @RequestParam(name = "sortBy", defaultValue = "name") String sortBy,
             @RequestParam(name = "direction", defaultValue = "asc") String direction,
-            @RequestParam(name = "name", required = false) String name,
-            @RequestParam(name = "minPrice", required = false) Integer minPrice,
-            @RequestParam(name ="maxPrice", required = false) Integer maxPrice
+            @RequestParam(name = "q", required = false) String q,
+            @RequestParam(name = "shopId", required = true) String shopId
     ) {
+        SearchProductByShopRequest request = SearchProductByShopRequest.builder()
+                .page(page)
+                .size(size)
+                .sortBy(sortBy)
+                .direction(direction)
+                .q(q)
+                .shopId(shopId)
+                .build();
+        Page<ProductResponse> products = service.getAllByShop(request);
+        PagingResponse pagingResponse = PagingResponse.builder()
+                .totalPage(products.getTotalPages())
+                .totalElement(products.getTotalElements())
+                .page(products.getPageable().getPageNumber() + 1)
+                .size(products.getPageable().getPageSize())
+                .hasNext(products.hasNext())
+                .hasPrevious(products.hasPrevious())
+                .build();
 
+        CommonResponse<List<ProductResponse>> response = CommonResponse.<List<ProductResponse>>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("Successfully get all products")
+                .data(products.getContent())
+                .paging(pagingResponse)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 }
