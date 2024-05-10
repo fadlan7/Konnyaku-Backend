@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
                                 .stream().map((accountImage ->
                                         ImageResponse.builder()
                                                 .name(accountImage.getImage().getName())
-                                                .url(ApiUrl.API_MENU_IMAGE_DOWNLOAD + accountImage.getImage().getId())
+                                                .url(ApiUrl.API_IMAGE_DOWNLOAD + accountImage.getImage().getId())
                                                 .build()
                                         )).toList())
                 .build();
@@ -106,7 +106,7 @@ public class UserServiceImpl implements UserService {
                             .identificationImages(user.getIdentificationImages()
                                     .stream().map((accountImage -> ImageResponse.builder()
                                             .name(accountImage.getImage().getName())
-                                            .url(ApiUrl.API_MENU_IMAGE_DOWNLOAD + accountImage.getImage().getId())
+                                            .url(ApiUrl.API_IMAGE_DOWNLOAD + accountImage.getImage().getId())
                                             .build())).toList())
                             .build();
                 }
@@ -149,7 +149,7 @@ public class UserServiceImpl implements UserService {
                         user.getIdentificationImages().stream().map(
                                 image -> ImageResponse.builder()
                                         .name(image.getImage().getName())
-                                        .url(ApiUrl.API_MENU_IMAGE_DOWNLOAD + image.getImage().getId())
+                                        .url(ApiUrl.API_IMAGE_DOWNLOAD + image.getImage().getId())
                                         .build()
                         ).toList()
                 )

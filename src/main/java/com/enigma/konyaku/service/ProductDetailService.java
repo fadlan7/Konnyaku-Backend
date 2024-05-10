@@ -10,4 +10,5 @@ public interface ProductDetailService {
     List<ProductDetail> create(List<ProductDetail> details);
     ProductDetail update(UpdateProductDetailRequest request);
     ProductDetail getDetailById(String id);
+
 }

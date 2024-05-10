@@ -15,6 +15,7 @@ import com.enigma.konyaku.repository.ShopRepository;
 import com.enigma.konyaku.service.*;
 import com.enigma.konyaku.specification.ShopSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,29 +33,12 @@ import java.util.Optional;
 public class ShopServiceImpl implements ShopService {
     private final ShopRepository repository;
     private final UserAccountService accountService;
-    private final AuthService authService;
     private final AddressService addressService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Shop create(NewShopRequest request) {
-        UserAccount account = accountService.getByUserId(request.getUserAccountId());
-
-        authService.updateRoles(account.getId());
-
-        Address address = addressService.create(request.getAddress());
-
-        Shop shop = repository.saveAndFlush(
-                Shop.builder()
-                        .name(request.getName())
-                        .mobilePhoneNo(request.getMobilePhoneNo())
-                        .address(address)
-                        .availability(true)
-                        .activity(true)
-                        .userAccount(account)
-                        .build()
-        );
-        return shop;
+    public Shop create(Shop shop) {
+        return repository.saveAndFlush(shop);
     }
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -78,7 +62,6 @@ public class ShopServiceImpl implements ShopService {
                 .build();
     }
     @Transactional(rollbackFor = Exception.class)
-
     @Override
     public Shop getShopById(String id) {
         Optional<Shop> shop = repository.findById(id);
@@ -183,5 +166,17 @@ public class ShopServiceImpl implements ShopService {
                                 .build()
                 )
                 .build();
+    }
+
+    @Override
+    public Shop getShopByUserAccountId(String shopId) {
+        return repository.findByUserAccount_Shop_Id(shopId);
+    }
+
+    @Override
+    public String getShopId(String userAccountId) {
+        UserAccount user = accountService.getByUserId(userAccountId);
+        Optional<Shop> shop = repository.findByUserAccount(user);
+        return shop.map(Shop::getId).orElse(null);
     }
 }

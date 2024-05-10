@@ -26,6 +26,9 @@ public class Product {
     private String description;
     @Column(name = "weight")
     private Integer weight;
+    @OneToOne
+    @JoinColumn(name = "thumbnail_image_id")
+    private Image image;
     @ManyToOne
     @JoinColumn(name = "shop_id")
     @JsonBackReference
@@ -35,4 +38,5 @@ public class Product {
     private List<ProductDetail> details;
     @Column(name = "status")
     private ProductAvailability status;
+
 }

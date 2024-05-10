@@ -23,40 +23,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ShopController {
     private final ShopService service;
-    @PostMapping(
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<CommonResponse<ShopResponse>> createNewShop(
-            @RequestBody NewShopRequest request
-            ) {
-        Shop shop = service.create(request);
-
-        ShopResponse shopResponse = ShopResponse.builder()
-                .id(shop.getId())
-                .name(shop.getName())
-                .mobilePhoneNo(shop.getMobilePhoneNo())
-                .address(
-                        AddressResponse.builder()
-                                .street(shop.getAddress().getStreet())
-                                .provinceId(shop.getAddress().getProvinceId())
-                                .provinceName(shop.getAddress().getProvinceName())
-                                .cityId(shop.getAddress().getCityId())
-                                .cityName(shop.getAddress().getCityName())
-                                .build()
-                )
-                .activity(shop.getActivity())
-                .availability(shop.getAvailability())
-                .build();
-
-        CommonResponse<ShopResponse> response = CommonResponse.<ShopResponse>builder()
-                .statusCode(HttpStatus.CREATED.value())
-                .message("Successfully create new shop")
-                .data(shopResponse)
-                .build();
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
 
     @GetMapping
     public ResponseEntity<CommonResponse<Page<ShopResponse>>> getAllShop(
@@ -144,6 +110,19 @@ public class ShopController {
                 .statusCode(HttpStatus.OK.value())
                 .message("Successfully update shop")
                 .data(shopResponse)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping(path = "/userAccount/{userAccountId}")
+    public ResponseEntity<CommonResponse<Shop>> getShopByUserAccountId(@PathVariable String userAccountId) {
+        Shop shop = service.getShopByUserAccountId(userAccountId);
+
+        CommonResponse<Shop> response = CommonResponse.<Shop>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("successfully get shop")
+                .data(shop)
                 .build();
 
         return ResponseEntity.ok(response);

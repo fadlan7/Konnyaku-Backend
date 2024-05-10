@@ -14,7 +14,9 @@ public class ProductResponse {
     private String id;
     private String name;
     private String description;
+    private ImageResponse thumbnail;
     private Integer weight;
     private ProductAvailability status;
     private List<ProductDetailResponse> details;
+
 }

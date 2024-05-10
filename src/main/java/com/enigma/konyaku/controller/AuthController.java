@@ -3,9 +3,11 @@ package com.enigma.konyaku.controller;
 import com.enigma.konyaku.constant.ApiUrl;
 import com.enigma.konyaku.dto.request.AuthRequest;
 import com.enigma.konyaku.dto.request.RegisterRequest;
+import com.enigma.konyaku.dto.request.RegisterShopRequest;
 import com.enigma.konyaku.dto.response.CommonResponse;
 import com.enigma.konyaku.dto.response.LoginResponse;
 import com.enigma.konyaku.dto.response.RegisterResponse;
+import com.enigma.konyaku.dto.response.RegisterShopResponse;
 import com.enigma.konyaku.service.AuthService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -54,6 +56,21 @@ public class AuthController {
             responseBuilder.statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseBuilder.build());
         }
+    }
+
+    @PostMapping(
+            path = "/register-shop",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<CommonResponse<RegisterShopResponse>> registerShop(@RequestBody RegisterShopRequest request){
+        RegisterShopResponse register = authService.registerShop(request);
+        CommonResponse<RegisterShopResponse> response = CommonResponse.<RegisterShopResponse>builder()
+                .statusCode(HttpStatus.CREATED.value())
+                .message("Successfully register shop")
+                .data(register)
+                .build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping(path = "/role")
