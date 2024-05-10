@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, String> {
+public interface ProductRepository extends JpaRepository<Product, String>, JpaSpecificationExecutor<Product> {
     @Query(nativeQuery = true,
     value = """
             SELECT id, name, description, weight FROM m_product
