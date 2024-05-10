@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class ShopController {
     private final ShopService service;
 
+
     @GetMapping
     public ResponseEntity<CommonResponse<Page<ShopResponse>>> getAllShop(
             @RequestParam(name = "page", defaultValue = "1") Integer page,

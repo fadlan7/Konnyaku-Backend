@@ -58,4 +58,17 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseBuilder.build());
         }
     }
+
+    @GetMapping
+    public ResponseEntity<CommonResponse<ProductResponse>> getAllProducts(
+            @RequestParam(name  = "page", defaultValue = "1") Integer page,
+            @RequestParam(name = "size", defaultValue = "10") Integer size,
+            @RequestParam(name = "sortBy", defaultValue = "name") String sortBy,
+            @RequestParam(name = "direction", defaultValue = "asc") String direction,
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "minPrice", required = false) Integer minPrice,
+            @RequestParam(name ="maxPrice", required = false) Integer maxPrice
+    ) {
+
+    }
 }

@@ -16,7 +16,7 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     value = """
             SELECT id, name, description, weight FROM m_product
             WHERE id IN
-            (SELECT p.id, SUM(pd.price) pd.status FROM m_product AS p
+            (SELECT p.id, SUM(pd.price) FROM m_product AS p
             INNER JOIN m_product_detail AS pd ON p.id = pd.product_id
             GROUP BY (p.id)
             HAVING SUM(pd.price) > :minPrice AND SUM(pd.price) < :maxPrice)
