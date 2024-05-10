@@ -252,7 +252,7 @@ public class ProductServiceImpl implements ProductService {
                     List<ProductDetailResponse> detailResponse = product.getDetails().stream()
                             .map(productDetail -> {
                                 ImageResponse imageResponse = ImageResponse.builder()
-                                        .url(productDetail.getImage().getPath())
+                                        .url( ApiUrl.API_IMAGE_DOWNLOAD + productDetail.getImage().getId())
                                         .name(productDetail.getImage().getName())
                                         .build();
 
@@ -266,7 +266,7 @@ public class ProductServiceImpl implements ProductService {
                             }).toList();
 
                     ImageResponse imageResponse = ImageResponse.builder()
-                            .url(product.getImage().getPath())
+                            .url(ApiUrl.API_IMAGE_DOWNLOAD + product.getImage().getId())
                             .name(product.getImage().getName())
                             .build();
 

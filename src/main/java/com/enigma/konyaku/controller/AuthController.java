@@ -51,7 +51,6 @@ public class AuthController {
                     .data(register)
                     .build();
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-
         } catch (DataIntegrityViolationException e) {
             throw e;
         } catch (Exception e) {
