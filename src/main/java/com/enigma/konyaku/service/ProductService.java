@@ -1,9 +1,6 @@
 package com.enigma.konyaku.service;
 
-import com.enigma.konyaku.dto.request.NewProductRequest;
-import com.enigma.konyaku.dto.request.SearchProductRequest;
-import com.enigma.konyaku.dto.request.SearchRequest;
-import com.enigma.konyaku.dto.request.UpdateProductRequest;
+import com.enigma.konyaku.dto.request.*;
 import com.enigma.konyaku.dto.response.ProductResponse;
 import com.enigma.konyaku.entity.Product;
 import org.springframework.data.domain.Page;
@@ -15,4 +12,5 @@ public interface ProductService {
     ProductResponse getById(String id);
     ProductResponse update(UpdateProductRequest request);
     void delete(String id);
+    Page<ProductResponse> getAllByShop(SearchProductByShopRequest request);
 }

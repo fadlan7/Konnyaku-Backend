@@ -3,6 +3,7 @@ package com.enigma.konyaku.service.impl;
 import com.enigma.konyaku.constant.ApiUrl;
 import com.enigma.konyaku.constant.ProductAvailability;
 import com.enigma.konyaku.dto.request.NewProductRequest;
+import com.enigma.konyaku.dto.request.SearchProductByShopRequest;
 import com.enigma.konyaku.dto.request.SearchProductRequest;
 import com.enigma.konyaku.dto.request.UpdateProductRequest;
 import com.enigma.konyaku.dto.response.ImageResponse;
@@ -16,8 +17,10 @@ import com.enigma.konyaku.service.ProductService;
 import com.enigma.konyaku.service.ImageService;
 import com.enigma.konyaku.service.ProductDetailService;
 import com.enigma.konyaku.service.ShopService;
+import com.enigma.konyaku.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,7 +45,7 @@ public class ProductServiceImpl implements ProductService {
                         .shop(shopService.getShopById(request.getShopId()))
                         .description(request.getDescription())
                         .weight(request.getWeight())
-                        .status(ProductAvailability.available)
+                        .status(ProductAvailability.AVAILABLE)
                         .build()
         );
 
@@ -96,7 +99,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Page<ProductResponse> getAll(SearchProductRequest request) {
         if (request.getPage() <= 0) request.setPage(1);
-        Sort sort = Sort.by(Sort.Direction.fromString(request.getDirection()),request.getSortBy());
+        Sort sort = Sort.by(Sort.Direction.fromString(request.getDirection()), request.getSortBy());
         Pageable pageable = PageRequest.of(request.getPage() - 1, request.getSize(), sort);
 
         Page<Product> productPage = repository.findAll(pageable);
@@ -117,7 +120,7 @@ public class ProductServiceImpl implements ProductService {
             name = "%" + request.getName().toLowerCase() + "%";
         }
 
-        if (repository.findAllFiltered(minPrice, maxPrice, name).isPresent()){
+        if (repository.findAllFiltered(minPrice, maxPrice, name).isPresent()) {
             List<Product> products = repository.findAllFiltered(minPrice, maxPrice, name).get();
             productPage = new PageImpl<>(products, pageable, products.size());
         }
@@ -233,5 +236,50 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void delete(String id) {
+    }
+
+    @Override
+    public Page<ProductResponse> getAllByShop(SearchProductByShopRequest request) {
+        Sort sort = Sort.by(Sort.Direction.fromString(request.getDirection()), request.getSortBy());
+        Pageable pageable = PageRequest.of((request.getPage() - 1), request.getSize(), sort);
+
+        Specification<Product> specification = ProductSpecification.getSpecification(request.getQ(), request.getShopId());
+
+        Page<Product> products = repository.findAll(specification, pageable);
+
+        List<ProductResponse> productResponses = products.getContent().stream()
+                .map(product -> {
+                    List<ProductDetailResponse> detailResponse = product.getDetails().stream()
+                            .map(productDetail -> {
+                                ImageResponse imageResponse = ImageResponse.builder()
+                                        .url(productDetail.getImage().getPath())
+                                        .name(productDetail.getImage().getName())
+                                        .build();
+
+                                return ProductDetailResponse.builder()
+                                        .id(productDetail.getId())
+                                        .name(productDetail.getName())
+                                        .description(productDetail.getDescription())
+                                        .price(productDetail.getPrice())
+                                        .image(imageResponse)
+                                        .build();
+                            }).toList();
+
+                    ImageResponse imageResponse = ImageResponse.builder()
+                            .url(product.getImage().getPath())
+                            .name(product.getImage().getName())
+                            .build();
+
+                    return ProductResponse.builder()
+                            .id(product.getId())
+                            .name(product.getName())
+                            .description(product.getDescription())
+                            .thumbnail(imageResponse)
+                            .weight(product.getWeight())
+                            .status(product.getStatus())
+                            .details(detailResponse)
+                            .build();
+                }).toList();
+        return new PageImpl<>(productResponses, pageable, products.getTotalElements());
     }
 }
