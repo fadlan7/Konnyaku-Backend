@@ -8,5 +8,4 @@ public class ApiUrl {
     public static final String API_USER = "/api/user";
     public static final String API_WISH_LIST = "/api/wish-list";
     public static final String API_PRODUCT_DETAIL = "/api/product-detail";
-
 }

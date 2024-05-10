@@ -13,6 +13,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +52,8 @@ public class AuthController {
                     .build();
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
+        } catch (DataIntegrityViolationException e) {
+            throw e;
         } catch (Exception e) {
             responseBuilder.message("Internal server error");
             responseBuilder.statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());

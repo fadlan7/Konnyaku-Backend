@@ -76,7 +76,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public RegisterResponse registerAdmin(RegisterRequest request) {
+    public RegisterResponse registerAdmin(RegisterRequest request) throws DataIntegrityViolationException {
         Role userRole = roleService.getOrSave(UserRole.ROLE_USER);
         Role admin = roleService.getOrSave(UserRole.ROLE_ADMIN);
         Role vendor = roleService.getOrSave(UserRole.ROLE_VENDOR);
