@@ -81,8 +81,11 @@ public class ProductServiceImpl implements ProductService {
                 }
         ).toList();
 
+        int priceAmount = details.stream().mapToInt(ProductDetail::getPrice).reduce(0, Integer::sum);
+
         return ProductResponse.builder()
                 .name(product.getName())
+                .priceAmount(priceAmount)
                 .description(product.getDescription())
                 .thumbnail(
                         ImageResponse.builder()
@@ -166,9 +169,11 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponse getById(String id) {
         Product product = getProductById(id);
+        int priceAmount = product.getDetails().stream().mapToInt(ProductDetail::getPrice).reduce(0, Integer::sum);
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
+                .priceAmount(priceAmount)
                 .description(product.getDescription())
                 .thumbnail(
                         ImageResponse.builder()
@@ -204,10 +209,12 @@ public class ProductServiceImpl implements ProductService {
         product.setStatus(request.getStatus());
 
         repository.saveAndFlush(product);
+        int priceAmount = product.getDetails().stream().mapToInt(ProductDetail::getPrice).reduce(0, Integer::sum);
 
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
+                .priceAmount(priceAmount)
                 .description(product.getDescription())
                 .thumbnail(
                         ImageResponse.builder()
@@ -236,6 +243,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void delete(String id) {
+
     }
 
     @Override
@@ -270,9 +278,12 @@ public class ProductServiceImpl implements ProductService {
                             .name(product.getImage().getName())
                             .build();
 
+                    int priceAmount = detailResponse.stream().mapToInt(ProductDetailResponse::getPrice).reduce(0, Integer::sum);
+
                     return ProductResponse.builder()
                             .id(product.getId())
                             .name(product.getName())
+                            .priceAmount(priceAmount)
                             .description(product.getDescription())
                             .thumbnail(imageResponse)
                             .weight(product.getWeight())

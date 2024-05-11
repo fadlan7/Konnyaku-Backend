@@ -13,6 +13,7 @@ import java.util.List;
 public class ProductResponse {
     private String id;
     private String name;
+    private Integer priceAmount;
     private String description;
     private ImageResponse thumbnail;
     private Integer weight;

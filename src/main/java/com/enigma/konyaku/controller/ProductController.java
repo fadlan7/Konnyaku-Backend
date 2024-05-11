@@ -100,4 +100,15 @@ public class ProductController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping(path = "/{id}")
+    public ResponseEntity<CommonResponse<ProductResponse>> getById(@PathVariable("id") String id) {
+        ProductResponse productResponse = service.getById(id);
+        CommonResponse<ProductResponse> response = CommonResponse.<ProductResponse>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("Successfully get products")
+                .data(productResponse)
+                .build();
+        return ResponseEntity.ok(response);
+    }
 }
