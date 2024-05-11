@@ -11,4 +11,5 @@ import java.util.List;
 public interface WishListService {
     WishList create(WishListRequest request);
     List<WishListResponse> getAll(String id);
+    void delete(String id);
 }

@@ -84,4 +84,11 @@ public class WishListServiceImpl implements WishListService {
                     .build();
         }).toList();
     }
+
+    @Override
+    public void delete(String id) {
+        repository.deleteById(id);
+    }
+
+
 }

@@ -1,6 +1,7 @@
 package com.enigma.konyaku.controller;
 
 import com.enigma.konyaku.constant.ApiUrl;
+import com.enigma.konyaku.constant.ResponseMessage;
 import com.enigma.konyaku.dto.request.SearchRequest;
 import com.enigma.konyaku.dto.request.WishListRequest;
 import com.enigma.konyaku.dto.response.CommonResponse;
@@ -48,6 +49,16 @@ public class WishListController {
                 .statusCode(HttpStatus.OK.value())
                 .message("Successfully get all data")
                 .data(wishLists)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping(path="/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CommonResponse<String>> deleteWishList(@PathVariable String id) {
+        service.delete(id);
+        CommonResponse<String> response = CommonResponse.<String>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message(ResponseMessage.SUCCESS_DELETE_DATA)
                 .build();
         return ResponseEntity.ok(response);
     }
