@@ -2,10 +2,7 @@ package com.enigma.konyaku.service.impl;
 
 import com.enigma.konyaku.constant.ApiUrl;
 import com.enigma.konyaku.constant.ProductAvailability;
-import com.enigma.konyaku.dto.request.NewProductRequest;
-import com.enigma.konyaku.dto.request.SearchProductByShopRequest;
-import com.enigma.konyaku.dto.request.SearchProductRequest;
-import com.enigma.konyaku.dto.request.UpdateProductRequest;
+import com.enigma.konyaku.dto.request.*;
 import com.enigma.konyaku.dto.response.ImageResponse;
 import com.enigma.konyaku.dto.response.ProductDetailResponse;
 import com.enigma.konyaku.dto.response.ProductResponse;
@@ -22,7 +19,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,6 +34,7 @@ public class ProductServiceImpl implements ProductService {
     private final ShopService shopService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ProductResponse create(NewProductRequest request) {
         Product product = repository.saveAndFlush(
                 Product.builder()
@@ -201,17 +201,28 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ProductResponse update(UpdateProductRequest request) {
         Product product = getProductById(request.getId());
 
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setStatus(request.getStatus());
+        product.setWeight(request.getWeight());
 
+        Image thumbnail = imageService.create(request.getThumbnail());
+        product.setImage(thumbnail);
 
-        // product.setDetails();
+        List<ProductDetail> productDetails = new ArrayList<>();
+        for(UpdateProductDetailRequest detail : request.getDetails()) {
+           ProductDetail productDetail =  detailService.update(detail);
+           productDetails.add(productDetail);
+        }
+        product.setDetails(productDetails);
 
         repository.saveAndFlush(product);
+
+
         int priceAmount = product.getDetails().stream().mapToInt(ProductDetail::getPrice).reduce(0, Integer::sum);
 
         return ProductResponse.builder()
