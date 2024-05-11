@@ -208,6 +208,9 @@ public class ProductServiceImpl implements ProductService {
         product.setDescription(request.getDescription());
         product.setStatus(request.getStatus());
 
+
+        // product.setDetails();
+
         repository.saveAndFlush(product);
         int priceAmount = product.getDetails().stream().mapToInt(ProductDetail::getPrice).reduce(0, Integer::sum);
 
@@ -260,7 +263,7 @@ public class ProductServiceImpl implements ProductService {
                     List<ProductDetailResponse> detailResponse = product.getDetails().stream()
                             .map(productDetail -> {
                                 ImageResponse imageResponse = ImageResponse.builder()
-                                        .url( ApiUrl.API_IMAGE_DOWNLOAD + productDetail.getImage().getId())
+                                        .url(ApiUrl.API_IMAGE_DOWNLOAD + productDetail.getImage().getId())
                                         .name(productDetail.getImage().getName())
                                         .build();
 
