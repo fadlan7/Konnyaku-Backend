@@ -2,6 +2,7 @@ package com.enigma.konyaku.service.impl;
 
 import com.enigma.konyaku.constant.ApiUrl;
 import com.enigma.konyaku.constant.ProductAvailability;
+import com.enigma.konyaku.constant.ResponseMessage;
 import com.enigma.konyaku.dto.request.*;
 import com.enigma.konyaku.dto.response.ImageResponse;
 import com.enigma.konyaku.dto.response.ProductDetailResponse;
@@ -16,18 +17,24 @@ import com.enigma.konyaku.service.ProductDetailService;
 import com.enigma.konyaku.service.ShopService;
 import com.enigma.konyaku.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
+    private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
     private final ProductRepository repository;
     private final ProductDetailService detailService;
     private final ImageService imageService;
@@ -161,44 +168,16 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product getProductById(String id) {
-        Optional<Product> product = repository.findById(id);
-        if (product.isEmpty()) throw new RuntimeException("Product Not Found");
-        return product.get();
+        return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, ResponseMessage.ERROR_NOT_FOUND));
     }
 
     @Override
     public ProductResponse getById(String id) {
         Product product = getProductById(id);
-        int priceAmount = product.getDetails().stream().mapToInt(ProductDetail::getPrice).reduce(0, Integer::sum);
-        return ProductResponse.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .priceAmount(priceAmount)
-                .description(product.getDescription())
-                .thumbnail(
-                        ImageResponse.builder()
-                                .name(product.getImage().getName())
-                                .url(ApiUrl.API_IMAGE_DOWNLOAD + product.getImage().getId())
-                                .build()
-                )
-                .weight(product.getWeight())
-                .status(product.getStatus())
-                .details(product.getDetails().stream().map(
-                        detail -> ProductDetailResponse.builder()
-                                .id(detail.getId())
-                                .name(detail.getName())
-                                .description(detail.getDescription())
-                                .price(detail.getPrice())
-                                .image(
-                                        ImageResponse.builder()
-                                                .name(detail.getImage().getName())
-                                                .name(ApiUrl.API_IMAGE_DOWNLOAD + detail.getImage().getId())
-                                                .build()
-                                )
-                                .build()
-                ).toList())
-                .build();
+        return getProductResponse(product);
     }
+
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -214,17 +193,22 @@ public class ProductServiceImpl implements ProductService {
         product.setImage(thumbnail);
 
         List<ProductDetail> productDetails = new ArrayList<>();
-        for(UpdateProductDetailRequest detail : request.getDetails()) {
-           ProductDetail productDetail =  detailService.update(detail);
-           productDetails.add(productDetail);
+        for (UpdateProductDetailRequest detail : request.getDetails()) {
+            ProductDetail productDetail = detailService.update(detail);
+            productDetails.add(productDetail);
         }
         product.setDetails(productDetails);
 
         repository.saveAndFlush(product);
 
+        return getProductResponse(product);
+    }
+
+
+
+    private ProductResponse getProductResponse(Product product) {
 
         int priceAmount = product.getDetails().stream().mapToInt(ProductDetail::getPrice).reduce(0, Integer::sum);
-
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -255,9 +239,22 @@ public class ProductServiceImpl implements ProductService {
                 .build();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void delete(String id) {
+        Product product = getProductById(id);
+        String thumbnailId = product.getImage().getId();
+        List<String> productDetailsImageIds = new ArrayList<>();
 
+        for (int i = 0; i < product.getDetails().size(); i++) {
+            productDetailsImageIds.add(product.getDetails().get(i).getImage().getId());
+        }
+        product.setStatus(ProductAvailability.REMOVED);
+        imageService.deleteFileImageById(thumbnailId);
+
+        for (int i = 0; i < product.getDetails().size(); i++) {
+            imageService.deleteFileImageById(productDetailsImageIds.get(i));
+        }
     }
 
     @Override

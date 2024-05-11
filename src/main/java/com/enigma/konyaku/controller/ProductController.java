@@ -1,6 +1,8 @@
 package com.enigma.konyaku.controller;
 
 import com.enigma.konyaku.constant.ApiUrl;
+
+import com.enigma.konyaku.constant.ResponseMessage;
 import com.enigma.konyaku.dto.request.*;
 import com.enigma.konyaku.dto.response.CommonResponse;
 import com.enigma.konyaku.dto.response.PagingResponse;
@@ -10,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.service.GenericResponseService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,6 +28,7 @@ import java.util.List;
 public class ProductController {
     private final ProductService service;
     private final ObjectMapper objectMapper;
+    private final GenericResponseService responseBuilder;
 
     @PostMapping(
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
@@ -142,5 +146,15 @@ public class ProductController {
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CommonResponse<String>> delete(@PathVariable("id") String id) {
+        service.delete(id);
+        CommonResponse<String> response = CommonResponse.<String>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message(ResponseMessage.SUCCESS_DELETE_DATA)
+                .build();
+        return ResponseEntity.ok(response);
     }
 }

@@ -14,7 +14,7 @@ public class ProductSpecification {
     public static Specification<Product> getSpecification(String q, String shopId) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.notEqual(root.get("status"), 3));
+            predicates.add(cb.notEqual(root.get("status"), 2));
             if (q != null) {
                 predicates.add(cb.like(cb.lower(root.get("name")), "%" + q.toLowerCase() + "%"));
             }
