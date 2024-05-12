@@ -11,17 +11,13 @@ import io.swagger.v3.oas.annotations.servers.Server;
 
 @OpenAPIDefinition(
         info = @Info(
-                contact = @Contact(
-                        name = "Saiful Rahman",
-                        email = "sr.perante@gmail.com"
-                ),
                 description = "Spring Security WMB API documentation",
-                title = "WMB API - Rahman",
+                title = "Final Project - Konnyaku",
                 version = "1.0"
         ),
         servers = {
                 @Server(
-                        description = "Local WMB",
+                        description = "Local Konnyaku",
                         url = "http://localhost:8080"
                 )
         },

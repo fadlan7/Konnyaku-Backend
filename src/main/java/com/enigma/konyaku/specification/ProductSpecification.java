@@ -14,14 +14,14 @@ public class ProductSpecification {
     public static Specification<Product> getSpecification(String q, String shopId) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.notEqual(root.get("status"), 3));
             if (q != null) {
                 predicates.add(cb.like(cb.lower(root.get("name")), "%" + q.toLowerCase() + "%"));
             }
             Join<Product, Shop> productJoin = root.join("shop", JoinType.INNER);
             predicates.add(cb.equal(productJoin.get("id"), shopId));
-            // predicates.add(cb.equal(root.get("shop").get("id"), shopId));
 
-            return cb.or(predicates.toArray(new Predicate[]{}));
+            return query.where(predicates.toArray(new Predicate[]{})).getRestriction();
         };
     }
 }
