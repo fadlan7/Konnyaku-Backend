@@ -4,6 +4,7 @@ import com.enigma.konyaku.constant.ApiUrl;
 import com.enigma.konyaku.dto.request.NewProductRequest;
 import com.enigma.konyaku.dto.request.ProductDetailRequest;
 import com.enigma.konyaku.dto.request.SearchProductByShopRequest;
+import com.enigma.konyaku.dto.request.SearchProductRequest;
 import com.enigma.konyaku.dto.response.CommonResponse;
 import com.enigma.konyaku.dto.response.PagingResponse;
 import com.enigma.konyaku.dto.response.ProductResponse;
@@ -100,6 +101,80 @@ public class ProductController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping
+    public ResponseEntity<CommonResponse<List<ProductResponse>>> getAllRandomProduct(
+            @RequestParam(name = "page", defaultValue = "1") Integer page,
+            @RequestParam(name = "size", defaultValue = "10") Integer size,
+            @RequestParam(name = "sortBy", defaultValue = "name") String sortBy,
+            @RequestParam(name = "direction", defaultValue = "asc") String direction,
+            @RequestParam(name = "q", required = false) String q
+    ) {
+        SearchProductByShopRequest request = SearchProductByShopRequest.builder()
+                .page(page)
+                .size(size)
+                .sortBy(sortBy)
+                .direction(direction)
+                .q(q)
+                .build();
+        Page<ProductResponse> products = service.getAllRandom(request);
+        PagingResponse pagingResponse = PagingResponse.builder()
+                .totalPage(products.getTotalPages())
+                .totalElement(products.getTotalElements())
+                .page(products.getPageable().getPageNumber() + 1)
+                .size(products.getPageable().getPageSize())
+                .hasNext(products.hasNext())
+                .hasPrevious(products.hasPrevious())
+                .build();
+
+        CommonResponse<List<ProductResponse>> response = CommonResponse.<List<ProductResponse>>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("Successfully get all products")
+                .data(products.getContent())
+                .paging(pagingResponse)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping(path = "/filter")
+    public ResponseEntity<CommonResponse<List<ProductResponse>>> getAllFilterPrice(
+            @RequestParam(name = "page", defaultValue = "1") Integer page,
+            @RequestParam(name = "size", defaultValue = "10") Integer size,
+            @RequestParam(name = "sortBy", defaultValue = "name") String sortBy,
+            @RequestParam(name = "direction", defaultValue = "asc") String direction,
+            @RequestParam(name = "minPrice", required = false, defaultValue = "0" ) Integer minPrice,
+            @RequestParam(name = "maxPrice", required = false, defaultValue = "2147483647" ) Integer maxPrice
+    ) {
+        SearchProductRequest request = SearchProductRequest.builder()
+                .page(page)
+                .size(size)
+                .sortBy(sortBy)
+                .direction(direction)
+                .minPrice(minPrice)
+                .maxPrice(maxPrice)
+                .build();
+        Page<ProductResponse> products = service.getAll(request);
+        PagingResponse pagingResponse = PagingResponse.builder()
+                .totalPage(products.getTotalPages())
+                .totalElement(products.getTotalElements())
+                .page(products.getPageable().getPageNumber() + 1)
+                .size(products.getPageable().getPageSize())
+                .hasNext(products.hasNext())
+                .hasPrevious(products.hasPrevious())
+                .build();
+
+        CommonResponse<List<ProductResponse>> response = CommonResponse.<List<ProductResponse>>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("Successfully get all products")
+                .data(products.getContent())
+                .paging(pagingResponse)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
 
     @GetMapping(path = "/{id}")
     public ResponseEntity<CommonResponse<ProductResponse>> getById(@PathVariable("id") String id) {
