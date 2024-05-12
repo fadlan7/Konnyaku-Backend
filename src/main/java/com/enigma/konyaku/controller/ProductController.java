@@ -1,14 +1,14 @@
 package com.enigma.konyaku.controller;
 
 import com.enigma.konyaku.constant.ApiUrl;
+
 import com.enigma.konyaku.constant.ResponseMessage;
-import com.enigma.konyaku.dto.request.NewProductRequest;
-import com.enigma.konyaku.dto.request.ProductDetailRequest;
-import com.enigma.konyaku.dto.request.SearchProductByShopRequest;
+import com.enigma.konyaku.dto.request.*;
 import com.enigma.konyaku.dto.response.CommonResponse;
 import com.enigma.konyaku.dto.response.PagingResponse;
 import com.enigma.konyaku.dto.response.ProductResponse;
 import com.enigma.konyaku.service.ProductService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class ProductController {
     public ResponseEntity<CommonResponse<ProductResponse>> create(
             @RequestPart(name = "product") String jsonProduct,
             @RequestParam(name = "thumbnail") MultipartFile thumbnail,
-            @RequestParam(name = "images") MultipartFile[] images) {
+            @RequestParam(name = "images") List<MultipartFile> images) {
         CommonResponse.CommonResponseBuilder<ProductResponse> responseBuilder = CommonResponse.builder();
         try {
             NewProductRequest request = objectMapper.readValue(jsonProduct, new TypeReference<>() {
@@ -46,7 +46,7 @@ public class ProductController {
             int index = 0;
 
             for (ProductDetailRequest detailRequest : request.getDetails()) {
-                detailRequest.setImage(images[index]);
+                detailRequest.setImage(images.get(index));
                 index++;
             }
 
@@ -113,6 +113,39 @@ public class ProductController {
                 .data(productResponse)
                 .build();
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping(
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<CommonResponse<ProductResponse>> updateProduct(
+            @RequestParam(name = "product") String jsonProduct,
+            @RequestParam(name = "thumbnail") MultipartFile thumbnail,
+            @RequestParam(name = "images") List<MultipartFile>  images
+    ) throws JsonProcessingException {
+        CommonResponse.CommonResponseBuilder<ProductResponse> responseBuilder = CommonResponse.builder();
+
+        UpdateProductRequest request = objectMapper.readValue(jsonProduct, new TypeReference<>() {
+        });
+
+        request.setThumbnail(thumbnail);
+
+        int index = 0;
+
+        for (UpdateProductDetailRequest detailRequest : request.getDetails()) {
+            detailRequest.setImage(images.get(index));
+            index++;
+        }
+
+        ProductResponse productResponse = service.update(request);
+
+        CommonResponse<ProductResponse> response = responseBuilder.statusCode(HttpStatus.CREATED.value())
+                .message("Successfully create new product")
+                .data(productResponse)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
