@@ -29,17 +29,30 @@ public class WishListController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<CommonResponse<WishList>> addWishList(@RequestBody WishListRequest request) {
+public ResponseEntity<CommonResponse<WishList>> addWishList(@RequestBody WishListRequest request) {
+    try {
         WishList wishList = service.create(request);
 
         CommonResponse<WishList> response = CommonResponse.<WishList>builder()
-                .statusCode(HttpStatus.CREATED.value())
-                .message("Successfully add new wish list item")
-                .data(wishList)
-                .build();
+               .statusCode(HttpStatus.CREATED.value())
+               .message("Successfully add new wish list item")
+               .data(wishList)
+               .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    } catch (RuntimeException e) {
+        if (e.getMessage().equals(ResponseMessage.EXISTING_WISHLIST)) {
+            CommonResponse<WishList> response = CommonResponse.<WishList>builder()
+                   .statusCode(HttpStatus.CONFLICT.value())
+                   .message(ResponseMessage.EXISTING_WISHLIST)
+                   .build();
+
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        } else {
+            throw e;
+        }
     }
+}
 
     @Transactional(rollbackFor = Exception.class)
     @GetMapping("/{id}")
