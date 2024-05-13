@@ -19,6 +19,7 @@ import com.enigma.konyaku.service.ImageService;
 import com.enigma.konyaku.service.ProductDetailService;
 import com.enigma.konyaku.service.ShopService;
 import com.enigma.konyaku.specification.ProductSpecification;
+import com.enigma.konyaku.specification.RandomProductSpecification;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,8 +116,7 @@ public class ProductServiceImpl implements ProductService {
         Page<Product> productPage = repository.findAll(pageable);
 
         Integer minPrice = 0;
-        Integer maxPrice = 2000000000;
-        String name = "%%";
+        Integer maxPrice = 2147483647;
 
         if (request.getMinPrice() != null) {
             minPrice = request.getMinPrice();
@@ -126,44 +126,49 @@ public class ProductServiceImpl implements ProductService {
             maxPrice = request.getMaxPrice();
         }
 
-        if (request.getName() != null) {
-            name = "%" + request.getName().toLowerCase() + "%";
-        }
 
-        if (repository.findAllFiltered(minPrice, maxPrice, name).isPresent()) {
-            List<Product> products = repository.findAllFiltered(minPrice, maxPrice, name).get();
+        if (repository.findAllFiltered(minPrice, maxPrice).isPresent()) {
+            List<Product> products = repository.findAllFiltered(minPrice, maxPrice).get();
             productPage = new PageImpl<>(products, pageable, products.size());
         }
 
-        return productPage.map(
-                product -> ProductResponse.builder()
-                        .id(product.getId())
-                        .name(product.getName())
-                        .description(product.getDescription())
-                        .thumbnail(
-                                ImageResponse.builder()
-                                        .name(product.getImage().getName())
-                                        .url(ApiUrl.API_IMAGE_DOWNLOAD + product.getImage().getId())
-                                        .build()
-                        )
-                        .weight(product.getWeight())
-                        .status(product.getStatus())
-                        .details(product.getDetails().stream().map(
-                                detail -> ProductDetailResponse.builder()
-                                        .id(detail.getId())
-                                        .name(detail.getName())
-                                        .description(detail.getDescription())
-                                        .price(detail.getPrice())
-                                        .image(
-                                                ImageResponse.builder()
-                                                        .name(detail.getImage().getName())
-                                                        .url(ApiUrl.API_IMAGE_DOWNLOAD + detail.getImage().getId())
-                                                        .build()
-                                        )
-                                        .build()
-                        ).toList())
-                        .build()
-        );
+        List<ProductResponse> productResponses = productPage.getContent().stream()
+                .map(product -> {
+                    List<ProductDetailResponse> detailResponse = product.getDetails().stream()
+                            .map(productDetail -> {
+                                ImageResponse imageResponse = ImageResponse.builder()
+                                        .url(ApiUrl.API_IMAGE_DOWNLOAD + productDetail.getImage().getId())
+                                        .name(productDetail.getImage().getName())
+                                        .build();
+
+                                return ProductDetailResponse.builder()
+                                        .id(productDetail.getId())
+                                        .name(productDetail.getName())
+                                        .description(productDetail.getDescription())
+                                        .price(productDetail.getPrice())
+                                        .image(imageResponse)
+                                        .build();
+                            }).toList();
+
+                    ImageResponse imageResponse = ImageResponse.builder()
+                            .url(ApiUrl.API_IMAGE_DOWNLOAD + product.getImage().getId())
+                            .name(product.getImage().getName())
+                            .build();
+
+                    int priceAmount = detailResponse.stream().mapToInt(ProductDetailResponse::getPrice).reduce(0, Integer::sum);
+
+                    return ProductResponse.builder()
+                            .id(product.getId())
+                            .name(product.getName())
+                            .priceAmount(priceAmount)
+                            .description(product.getDescription())
+                            .thumbnail(imageResponse)
+                            .weight(product.getWeight())
+                            .status(product.getStatus())
+                            .details(detailResponse)
+                            .build();
+                }).toList();
+        return new PageImpl<>(productResponses, pageable, productPage.getTotalElements());
     }
 
     @Override
@@ -286,5 +291,60 @@ public class ProductServiceImpl implements ProductService {
                             .build();
                 }).toList();
         return new PageImpl<>(productResponses, pageable, products.getTotalElements());
+    }
+
+    @Override
+    public Page<ProductResponse> getAllRandom(SearchProductByShopRequest request) {
+        if (request.getPage() <= 0) request.setPage(1);
+
+        Sort sort = Sort.by(Sort.Direction.fromString(request.getDirection()), request.getSortBy());
+        Pageable pageable = PageRequest.of((request.getPage() - 1), request.getSize(), sort);
+        Specification<Product> specification = RandomProductSpecification.getSpecification(request.getQ());
+
+
+        Page<Product> productPages = repository.getAllByRandom(pageable);
+
+
+        if (request.getQ() != null) {
+            productPages = repository.findAll(specification, pageable);
+        }
+
+        List<ProductResponse> productResponses = productPages.getContent().stream()
+                .map(product -> {
+                    List<ProductDetailResponse> detailResponse = product.getDetails().stream()
+                            .map(productDetail -> {
+                                ImageResponse imageResponse = ImageResponse.builder()
+                                        .url(ApiUrl.API_IMAGE_DOWNLOAD + productDetail.getImage().getId())
+                                        .name(productDetail.getImage().getName())
+                                        .build();
+
+                                return ProductDetailResponse.builder()
+                                        .id(productDetail.getId())
+                                        .name(productDetail.getName())
+                                        .description(productDetail.getDescription())
+                                        .price(productDetail.getPrice())
+                                        .image(imageResponse)
+                                        .build();
+                            }).toList();
+
+                    ImageResponse imageResponse = ImageResponse.builder()
+                            .url(ApiUrl.API_IMAGE_DOWNLOAD + product.getImage().getId())
+                            .name(product.getImage().getName())
+                            .build();
+
+                    int priceAmount = detailResponse.stream().mapToInt(ProductDetailResponse::getPrice).reduce(0, Integer::sum);
+
+                    return ProductResponse.builder()
+                            .id(product.getId())
+                            .name(product.getName())
+                            .priceAmount(priceAmount)
+                            .description(product.getDescription())
+                            .thumbnail(imageResponse)
+                            .weight(product.getWeight())
+                            .status(product.getStatus())
+                            .details(detailResponse)
+                            .build();
+                }).toList();
+        return new PageImpl<>(productResponses, pageable, productPages.getTotalElements());
     }
 }

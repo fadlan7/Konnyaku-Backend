@@ -13,4 +13,5 @@ public interface ProductService {
     ProductResponse update(UpdateProductRequest request);
     void delete(String id);
     Page<ProductResponse> getAllByShop(SearchProductByShopRequest request);
+    Page<ProductResponse> getAllRandom(SearchProductByShopRequest request);
 }
