@@ -1,6 +1,7 @@
 package com.enigma.konyaku.service.impl;
 
 import com.enigma.konyaku.constant.ApiUrl;
+import com.enigma.konyaku.constant.ResponseMessage;
 import com.enigma.konyaku.dto.request.WishListRequest;
 import com.enigma.konyaku.dto.response.ImageResponse;
 import com.enigma.konyaku.dto.response.ProductDetailResponse;
@@ -31,14 +32,21 @@ public class WishListServiceImpl implements WishListService {
 
     @Override
     public WishList create(WishListRequest request) {
-        User user = userService.findByAccountId(request.getAccountId());
-        Product product = productService.getProductById(request.getProductId());
-        return repository.saveAndFlush(
-                WishList.builder()
-                        .user(user)
-                        .product(product)
-                        .build()
-        );
+        var check = checkExisting(request.getAccountId(), request.getProductId());
+        System.out.println(check);
+        if (check) {
+            throw new RuntimeException(ResponseMessage.EXISTING_WISHLIST);
+        } else {
+            User user = userService.findByAccountId(request.getAccountId());
+            Product product = productService.getProductById(request.getProductId());
+            return repository.saveAndFlush(
+                    WishList.builder()
+                            .user(user)
+                            .product(product)
+                            .build()
+            );
+        }
+
     }
 
     @Override
@@ -90,5 +98,10 @@ public class WishListServiceImpl implements WishListService {
         repository.deleteById(id);
     }
 
+    @Override
+    public boolean checkExisting(String userAccId, String productId) {
+        User user = userService.findByAccountId(userAccId);
 
+        return repository.findingNemo(user.getId(), productId);
+    }
 }

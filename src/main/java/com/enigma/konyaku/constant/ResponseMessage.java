@@ -15,4 +15,5 @@ public class ResponseMessage {
     public static final String BAD_CREDENTIAL = "Bad credentials";
     public static final String INVALID_MIN_MAX_PRICE = "min price cannot be more than max price";
     public static final String ERROR_INVALID_JWT = "invalid jwt";
+    public static final String EXISTING_WISHLIST = "Already exist in wishlist";
 }
