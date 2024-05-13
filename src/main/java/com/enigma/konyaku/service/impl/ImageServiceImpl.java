@@ -1,11 +1,11 @@
 package com.enigma.konyaku.service.impl;
 
+import com.enigma.konyaku.constant.ResponseMessage;
 import com.enigma.konyaku.entity.Image;
 import com.enigma.konyaku.repository.ImageRepository;
 import com.enigma.konyaku.service.ImageService;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.ConstraintViolationException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -45,8 +45,8 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public Image create(MultipartFile multipartFile) {
         try {
-            if (!List.of("image/jpeg","image/png","image/jpg","image/svg+xml").contains(multipartFile.getContentType())) {
-                throw new ConstraintViolationException("Invalid content type",null);
+            if (!List.of("image/jpeg", "image/png", "image/jpg", "image/svg+xml").contains(multipartFile.getContentType())) {
+                throw new ConstraintViolationException("Invalid content type", null);
             }
 
             String uniqueFileName = System.currentTimeMillis() + " " + multipartFile.getOriginalFilename();
@@ -75,10 +75,10 @@ public class ImageServiceImpl implements ImageService {
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                             "Not found"));
             Path filePath = Paths.get(image.getPath());
-            if (!Files.exists(filePath)) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Not found");
+            if (!Files.exists(filePath)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
             return new UrlResource(filePath.toUri());
         } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -86,14 +86,28 @@ public class ImageServiceImpl implements ImageService {
     public void deleteById(String id) {
         try {
             Image image = imageRepository.findById(id)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "Not found"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, ResponseMessage.ERROR_NOT_FOUND));
             Path filePath = Paths.get(image.getPath());
-            if (!Files.exists(filePath)) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Not found");
-            Files.delete(filePath);
-            imageRepository.delete(image);
+            if (Files.exists(filePath)) {
+                Files.delete(filePath);
+            }
+            imageRepository.deleteById(id);
         } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteFileImageById(String id) {
+        try {
+            Image image = imageRepository.findById(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, ResponseMessage.ERROR_NOT_FOUND));
+            Path filePath = Paths.get(image.getPath());
+            if (Files.exists(filePath)) {
+                Files.delete(filePath);
+            }
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 }

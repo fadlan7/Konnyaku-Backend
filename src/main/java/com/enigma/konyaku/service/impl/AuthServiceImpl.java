@@ -220,6 +220,7 @@ public class AuthServiceImpl implements AuthService {
         shopService.create(shop);
 
         return RegisterShopResponse.builder()
+                .id(shop.getId())
                 .name(shop.getName())
                 .roles(account.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
                 .build();
