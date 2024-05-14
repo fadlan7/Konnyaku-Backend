@@ -39,8 +39,8 @@ public class ProductController {
     )
     public ResponseEntity<CommonResponse<ProductResponse>> create(
             @RequestPart(name = "product") String jsonProduct,
-            @RequestParam(name = "thumbnail") MultipartFile thumbnail,
-            @RequestParam(name = "images") List<MultipartFile> images) {
+            @RequestParam(name = "thumbnail", required = false) MultipartFile thumbnail,
+            @RequestParam(name = "images", required = false) List<MultipartFile> images) {
         CommonResponse.CommonResponseBuilder<ProductResponse> responseBuilder = CommonResponse.builder();
         try {
             NewProductRequest request = objectMapper.readValue(jsonProduct, new TypeReference<>() {
@@ -199,12 +199,11 @@ public class ProductController {
     public ResponseEntity<CommonResponse<ProductResponse>> updateProduct(
             @RequestParam(name = "product") String jsonProduct,
             @RequestParam(name = "thumbnail", required = false) MultipartFile thumbnail,
-            @RequestParam(name = "images", required = false) List<MultipartFile> images
+            @RequestParam(name = "images", required = false) List<MultipartFile>  images
     ) throws JsonProcessingException {
         CommonResponse.CommonResponseBuilder<ProductResponse> responseBuilder = CommonResponse.builder();
 
-        UpdateProductRequest request = objectMapper.readValue(jsonProduct, new TypeReference<>() {
-        });
+        UpdateProductRequest request = objectMapper.readValue(jsonProduct, new TypeReference<>() {});
 
         request.setThumbnail(thumbnail);
 

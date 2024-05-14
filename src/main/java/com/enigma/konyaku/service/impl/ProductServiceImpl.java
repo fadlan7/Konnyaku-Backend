@@ -3,10 +3,7 @@ package com.enigma.konyaku.service.impl;
 import com.enigma.konyaku.constant.ApiUrl;
 import com.enigma.konyaku.constant.ProductAvailability;
 import com.enigma.konyaku.constant.ResponseMessage;
-import com.enigma.konyaku.dto.request.NewProductRequest;
-import com.enigma.konyaku.dto.request.SearchProductByShopRequest;
-import com.enigma.konyaku.dto.request.SearchProductRequest;
-import com.enigma.konyaku.dto.request.UpdateProductRequest;
+import com.enigma.konyaku.dto.request.*;
 import com.enigma.konyaku.dto.response.ImageResponse;
 import com.enigma.konyaku.dto.response.ProductDetailResponse;
 import com.enigma.konyaku.dto.response.ProductResponse;
@@ -222,6 +219,18 @@ public class ProductServiceImpl implements ProductService {
         product.setDescription(request.getDescription());
         product.setStatus(request.getStatus());
 
+        if(request.getThumbnail() != null){
+            Image image = imageService.create(request.getThumbnail());
+            product.setImage(image);
+        }
+
+        List<ProductDetail> productDetails = new ArrayList<>();
+        for(UpdateProductDetailRequest detailRequest : request.getDetails()){
+           ProductDetail productDetail =  detailService.update(detailRequest);
+           productDetails.add(productDetail);
+        }
+
+        product.setDetails(productDetails);
 
         repository.saveAndFlush(product);
         return getProductResponse(product);
