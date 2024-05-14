@@ -149,8 +149,8 @@ public class ProductController {
             @RequestParam(name = "size", defaultValue = "10") Integer size,
             @RequestParam(name = "sortBy", defaultValue = "name") String sortBy,
             @RequestParam(name = "direction", defaultValue = "asc") String direction,
-            @RequestParam(name = "minPrice", required = false, defaultValue = "0" ) Integer minPrice,
-            @RequestParam(name = "maxPrice", required = false, defaultValue = "2147483647" ) Integer maxPrice
+            @RequestParam(name = "minPrice", required = false, defaultValue = "0") Integer minPrice,
+            @RequestParam(name = "maxPrice", required = false, defaultValue = "2147483647") Integer maxPrice
     ) {
         SearchProductRequest request = SearchProductRequest.builder()
                 .page(page)
@@ -198,8 +198,8 @@ public class ProductController {
     )
     public ResponseEntity<CommonResponse<ProductResponse>> updateProduct(
             @RequestParam(name = "product") String jsonProduct,
-            @RequestParam(name = "thumbnail") MultipartFile thumbnail,
-            @RequestParam(name = "images") List<MultipartFile>  images
+            @RequestParam(name = "thumbnail", required = false) MultipartFile thumbnail,
+            @RequestParam(name = "images", required = false) List<MultipartFile> images
     ) throws JsonProcessingException {
         CommonResponse.CommonResponseBuilder<ProductResponse> responseBuilder = CommonResponse.builder();
 
