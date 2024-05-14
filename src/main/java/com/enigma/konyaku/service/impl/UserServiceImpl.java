@@ -57,6 +57,7 @@ public class UserServiceImpl implements UserService {
                                 .provinceId(user.getAddress().getProvinceId())
                                 .cityName(user.getAddress().getCityName())
                                 .cityId(user.getAddress().getCityId())
+                                .street(user.getAddress().getStreet())
                                 .build()
                 )
                 .identificationImages(
@@ -124,7 +125,8 @@ public class UserServiceImpl implements UserService {
         address.setProvinceName(addressRequest.getProvinceName());
         address.setProvinceId(addressRequest.getProvinceId());
         address.setCityName(addressRequest.getCityName());
-        address.setCityId(address.getCityId());
+        address.setCityId(addressRequest.getCityId());
+        address.setStreet(addressRequest.getStreet());
 
         user.setActivity(request.getActivity());
         user.setMobilePhoneNo(request.getMobilePhoneNo());
