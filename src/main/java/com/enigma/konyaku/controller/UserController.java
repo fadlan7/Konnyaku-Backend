@@ -5,6 +5,7 @@ import com.enigma.konyaku.dto.request.SearchRequest;
 import com.enigma.konyaku.dto.request.UpdateUserRequest;
 import com.enigma.konyaku.dto.response.CommonResponse;
 import com.enigma.konyaku.dto.response.UserResponse;
+import com.enigma.konyaku.entity.User;
 import com.enigma.konyaku.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -54,6 +55,24 @@ public class UserController {
                 .statusCode(HttpStatus.OK.value())
                 .message("Successfully get user")
                 .data(userResponse)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @GetMapping(path = "/account/{accountId}")
+    public ResponseEntity<CommonResponse<User>> getByAccountId(@PathVariable String accountId) {
+        User userResponse = service.findByAccountId(accountId);
+
+        User user = User.builder()
+                .id(userResponse.getId())
+                .build();
+
+        CommonResponse<User> response = CommonResponse.<User>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("Successfully get user")
+                .data(user)
                 .build();
 
         return ResponseEntity.ok(response);
