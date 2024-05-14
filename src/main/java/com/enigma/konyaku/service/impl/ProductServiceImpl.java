@@ -211,13 +211,13 @@ public class ProductServiceImpl implements ProductService {
                 .build();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public ProductResponse update(UpdateProductRequest request) {
         Product product = getProductById(request.getId());
 
         product.setName(request.getName());
         product.setDescription(request.getDescription());
-        product.setStatus(request.getStatus());
 
         if(request.getThumbnail() != null){
             Image image = imageService.create(request.getThumbnail());
@@ -232,7 +232,6 @@ public class ProductServiceImpl implements ProductService {
 
         product.setDetails(productDetails);
 
-        repository.saveAndFlush(product);
         return getProductResponse(product);
     }
 

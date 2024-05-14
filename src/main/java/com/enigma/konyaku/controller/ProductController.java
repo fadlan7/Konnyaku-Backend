@@ -199,25 +199,29 @@ public class ProductController {
     public ResponseEntity<CommonResponse<ProductResponse>> updateProduct(
             @RequestParam(name = "product") String jsonProduct,
             @RequestParam(name = "thumbnail", required = false) MultipartFile thumbnail,
-            @RequestParam(name = "images", required = false) List<MultipartFile>  images
+            @RequestParam(name = "images", required = false) List<MultipartFile> images
     ) throws JsonProcessingException {
         CommonResponse.CommonResponseBuilder<ProductResponse> responseBuilder = CommonResponse.builder();
 
-        UpdateProductRequest request = objectMapper.readValue(jsonProduct, new TypeReference<>() {});
+        UpdateProductRequest request = objectMapper.readValue(jsonProduct, new TypeReference<>() {
+        });
 
         request.setThumbnail(thumbnail);
 
         int index = 0;
 
         for (UpdateProductDetailRequest detailRequest : request.getDetails()) {
-            detailRequest.setImage(images.get(index));
-            index++;
+            if (images != null) {
+                detailRequest.setImage(images.get(index));
+                index++;
+            }
         }
 
         ProductResponse productResponse = service.update(request);
 
-        CommonResponse<ProductResponse> response = responseBuilder.statusCode(HttpStatus.CREATED.value())
-                .message("Successfully create new product")
+        CommonResponse<ProductResponse> response = responseBuilder
+                .statusCode(HttpStatus.OK.value())
+                .message(ResponseMessage.SUCCESS_UPDATE_DATA)
                 .data(productResponse)
                 .build();
 
