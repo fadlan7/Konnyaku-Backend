@@ -42,6 +42,7 @@ public class ProductDetailServiceImpl implements ProductDetailService {
         detail.setDescription(request.getDescription());
         detail.setPrice(request.getPrice());
 
+        repository.saveAndFlush(detail);
         return detail;
     }
 }

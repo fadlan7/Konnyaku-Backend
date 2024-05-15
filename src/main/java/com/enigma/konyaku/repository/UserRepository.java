@@ -14,9 +14,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, String>, JpaSpecificationExecutor<User> {
     @Query(
             nativeQuery = true,
-            value = """
-                    SELECT * FROM m_user WHERE user_account_id = :accountId;
-                    """
+            value = "SELECT * FROM m_user WHERE user_account_id = ?1"
     )
-    Optional<User> findByAccountId(@Param("accountId") String accountId);
+    Optional<User> findByAccountId(String accountId);
 }

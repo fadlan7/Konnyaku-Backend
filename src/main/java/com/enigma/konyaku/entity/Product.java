@@ -38,4 +38,5 @@ public class Product {
     private List<ProductDetail> details;
     @Column(name = "status")
     private ProductAvailability status;
+
 }

@@ -21,6 +21,6 @@ public class Image {
     private String path;
     @Column(name = "size", nullable = false)
     private Long size;
-    @Column(name = "content_type",nullable = false)
+    @Column(name = "content_type", nullable = false)
     private String contentType;
 }

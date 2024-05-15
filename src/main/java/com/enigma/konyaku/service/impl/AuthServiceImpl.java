@@ -1,16 +1,22 @@
 package com.enigma.konyaku.service.impl;
 
 import com.enigma.konyaku.constant.UserRole;
+import com.enigma.konyaku.dto.request.AddressRequest;
 import com.enigma.konyaku.dto.request.AuthRequest;
 import com.enigma.konyaku.dto.request.RegisterRequest;
+import com.enigma.konyaku.dto.request.RegisterShopRequest;
 import com.enigma.konyaku.dto.response.LoginResponse;
 import com.enigma.konyaku.dto.response.RegisterResponse;
+import com.enigma.konyaku.dto.response.RegisterShopResponse;
 import com.enigma.konyaku.entity.*;
 import com.enigma.konyaku.repository.UserAccountRepository;
 import com.enigma.konyaku.service.*;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,6 +32,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
     private final UserAccountRepository userAccountRepository;
     private final RoleService roleService;
@@ -36,11 +43,15 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final ImageService imageService;
     private final AuthenticationManager authenticationManager;
+    private final UserAccountService userAccountService;
+    private final ShopService shopService;
+
 
     @Value("${konyaku.username.superadmin}")
     private String superAdminUsername;
     @Value("${konyaku.password.superadmin}")
     private String superAdminPassword;
+
 
     @Transactional(rollbackFor = Exception.class)
     @PostConstruct
@@ -62,6 +73,7 @@ public class AuthServiceImpl implements AuthService {
 
         userAccountRepository.save(account);
     }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public RegisterResponse registerAdmin(RegisterRequest request) throws DataIntegrityViolationException {
@@ -167,14 +179,14 @@ public class AuthServiceImpl implements AuthService {
 
         List<AccountImage> images = accountImageService.create(
                 request.getImages().stream().map(
-                    (image) -> {
-                        Image createdImage = imageService.create(image);
-                        return AccountImage.builder()
-                                .image(createdImage)
-                                .user(user)
-                                .build();
-                    }
-        ).toList());
+                        (image) -> {
+                            Image createdImage = imageService.create(image);
+                            return AccountImage.builder()
+                                    .image(createdImage)
+                                    .user(user)
+                                    .build();
+                        }
+                ).toList());
 
         List<String> roles = account.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).toList();
@@ -187,6 +199,34 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public RegisterShopResponse registerShop(RegisterShopRequest request) {
+        UserAccount account = userAccountService.getContext();
+        Role vendor = roleService.getOrSave(UserRole.ROLE_VENDOR);
+        List<Role> roles = account.getRole();
+        roles.add(vendor);
+
+        Address address = addressService.create(request.getAddress());
+        UserAccount userAccount = userAccountService.getByUserId(request.getUserAccountId());
+        Shop shop = Shop.builder()
+                .name(request.getName())
+                .address(address)
+                .mobilePhoneNo(request.getMobilePhoneNo())
+                .activity(true)
+                .availability(true)
+                .userAccount(userAccount)
+                .build();
+        shopService.create(shop);
+
+        return RegisterShopResponse.builder()
+                .id(shop.getId())
+                .name(shop.getName())
+                .roles(account.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
+                .build();
+
+    }
+
     @Transactional(readOnly = true)
     @Override
     public LoginResponse login(AuthRequest request) {
@@ -194,15 +234,22 @@ public class AuthServiceImpl implements AuthService {
                 request.getUsername(),
                 request.getPassword()
         );
+
         Authentication authenticate = authenticationManager.authenticate(authentication);
         SecurityContextHolder.getContext().setAuthentication(authenticate);
         UserAccount userAccount = (UserAccount) authenticate.getPrincipal();
         String token = jwtService.generateToken(userAccount);
+
+        Shop accountShop = userAccount.getShop();
+        String shopId = (accountShop != null) ? accountShop.getId() : null;
+
+
         return LoginResponse.builder()
                 .userAccountId(userAccount.getId())
                 .username(userAccount.getUsername())
                 .roles(userAccount.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
                 .token(token)
+                .shopId(shopId)
                 .build();
     }
 

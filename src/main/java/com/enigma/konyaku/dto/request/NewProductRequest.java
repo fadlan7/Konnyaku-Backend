@@ -17,5 +17,4 @@ public class NewProductRequest {
     private Integer weight;
     private String shopId;
     private List<ProductDetailRequest> details;
-
 }

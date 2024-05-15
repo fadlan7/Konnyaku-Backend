@@ -9,10 +9,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class LoginResponse {
-    private String userAccountId;
-    private String shopId;
-    private String username;
-    private String token;
+public class RegisterShopResponse {
+    private String id;
+    private String name;
     private List<String> roles;
 }

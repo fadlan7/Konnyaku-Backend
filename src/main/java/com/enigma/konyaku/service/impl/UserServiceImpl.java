@@ -1,6 +1,7 @@
 package com.enigma.konyaku.service.impl;
 
 import com.enigma.konyaku.constant.ApiUrl;
+import com.enigma.konyaku.constant.ResponseMessage;
 import com.enigma.konyaku.dto.request.AddressRequest;
 import com.enigma.konyaku.dto.request.SearchRequest;
 import com.enigma.konyaku.dto.request.UpdateUserRequest;
@@ -38,10 +39,9 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public User findByAccountId(String id) {
-        Optional<User> user = userRepository.findByAccountId(id);
-        if (user.isEmpty()) throw new RuntimeException("User not found");
-        return user.get();
+        return userRepository.findByAccountId(id).orElseThrow(() -> new RuntimeException(ResponseMessage.ERROR_NOT_FOUND));
     }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public UserResponse getById(String id) {
@@ -57,6 +57,7 @@ public class UserServiceImpl implements UserService {
                                 .provinceId(user.getAddress().getProvinceId())
                                 .cityName(user.getAddress().getCityName())
                                 .cityId(user.getAddress().getCityId())
+                                .street(user.getAddress().getStreet())
                                 .build()
                 )
                 .identificationImages(
@@ -66,7 +67,7 @@ public class UserServiceImpl implements UserService {
                                                 .name(accountImage.getImage().getName())
                                                 .url(ApiUrl.API_IMAGE_DOWNLOAD + accountImage.getImage().getId())
                                                 .build()
-                                        )).toList())
+                                )).toList())
                 .build();
     }
 
@@ -83,7 +84,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<UserResponse> getAll(SearchRequest request) {
         if (request.getPage() <= 0) request.setPage(1);
-        Sort sort = Sort.by(Sort.Direction.fromString(request.getDirection()),request.getSortBy());
+        Sort sort = Sort.by(Sort.Direction.fromString(request.getDirection()), request.getSortBy());
         Pageable pageable = PageRequest.of(request.getPage() - 1, request.getSize(), sort);
 
         Specification<User> specification = UserSpecification.getSpecification(request);
@@ -124,7 +125,8 @@ public class UserServiceImpl implements UserService {
         address.setProvinceName(addressRequest.getProvinceName());
         address.setProvinceId(addressRequest.getProvinceId());
         address.setCityName(addressRequest.getCityName());
-        address.setCityId(address.getCityId());
+        address.setCityId(addressRequest.getCityId());
+        address.setStreet(addressRequest.getStreet());
 
         user.setActivity(request.getActivity());
         user.setMobilePhoneNo(request.getMobilePhoneNo());

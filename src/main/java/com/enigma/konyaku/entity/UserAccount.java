@@ -1,6 +1,7 @@
 package com.enigma.konyaku.entity;
 
 import com.enigma.konyaku.constant.TableConstant;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,6 +30,9 @@ public class UserAccount implements UserDetails {
     private Boolean isEnable;
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Role> role;
+
+    @OneToOne(mappedBy = "userAccount")
+    private Shop shop;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
